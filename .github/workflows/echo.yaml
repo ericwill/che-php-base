@@ -13,8 +13,23 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Echo VERSION
+      - name: Setup params
+        id: input-params
         run: |
-          MSG=$(cat VERSION)
-          echo "${MSG}"
+          echo "##[set-output name=version;]$(cat VERSION)"
+          echo "##[set-output name=sha_id;]$(git rev-parse --short HEAD)"
+
+      - name: Send message
+        id: build-action
+        uses: ericwill/build-action@v34
+        with:
+          repo: https://github.com/ericwill/che-php-base
+          docker_user: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          image_name: quay.io/ericwill/k8s-sidecar
+          image_version: ${{ steps.input-params.outputs.version }}
+          short_sha1: ${{ steps.input-params.outputs.sha_id }}
+
+      - name: Get the output
+        run: echo "The response was ${{ steps.build-action.outputs.return-message }}"
 
