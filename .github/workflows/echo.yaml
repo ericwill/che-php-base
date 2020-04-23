@@ -4,7 +4,7 @@ on:
     - 'master'
 
 jobs:
-  my_first_job:
+  build:
     runs-on: ubuntu-latest
     steps:
       
@@ -14,22 +14,30 @@ jobs:
           fetch-depth: 1
 
       - name: Setup params
-        id: input-params
+        id: version-sha
         run: |
           echo "##[set-output name=version;]$(cat VERSION)"
           echo "##[set-output name=sha_id;]$(git rev-parse --short HEAD)"
 
-      - name: Send message
-        id: build-action
-        uses: ericwill/build-action@v34
+      - name: Docker login
+        uses: azure/docker-login@v1
         with:
-          repo: https://github.com/ericwill/che-php-base
-          docker_user: ${{ secrets.DOCKER_USERNAME }}
-          docker_password: ${{ secrets.DOCKER_PASSWORD }}
-          image_name: quay.io/ericwill/k8s-sidecar
-          image_version: ${{ steps.input-params.outputs.version }}
-          short_sha1: ${{ steps.input-params.outputs.sha_id }}
-
-      - name: Get the output
-        run: echo "The response was ${{ steps.build-action.outputs.return-message }}"
-
+          login-server: quay.io
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+        
+      - name: Docker build, tag, and push
+        run: |
+          echo "Building image ${IMAGE_NAME}"
+          cd ${IMAGE_VERSION}
+          docker build -t ${IMAGE_NAME} .
+          docker tag "${IMAGE_NAME}" "${IMAGE_NAME}:${IMAGE_VERSION}"
+          echo "$Pushing {IMAGE_NAME}:${IMAGE_VERSION}"
+          docker push "${IMAGE_NAME}:${IMAGE_VERSION}"
+          docker tag "${IMAGE_NAME}" "${IMAGE_NAME}:${IMAGE_VERSION}-${SHORT_SHA1}"
+          echo "Pushing ${IMAGE_NAME}:${IMAGE_VERSION}-${SHORT_SHA1}"
+          docker push "${IMAGE_NAME}:${IMAGE_VERSION}-${SHORT_SHA1}"
+        env:
+          IMAGE_NAME: quay.io/ericwill/k8s-sidecar
+          IMAGE_VERSION: ${{ steps.version-sha.outputs.version }}
+          SHORT_SHA1: ${{ steps.version-sha.outputs.sha_id }}
