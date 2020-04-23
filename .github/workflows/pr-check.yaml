@@ -24,10 +24,14 @@ jobs:
       with:
         fetch-depth: 1
 
+    - name: Get VERSION
+      id: version
+      run: |
+        echo "##[set-output name=version;]$(cat VERSION)"
     - name: Docker build
       run: |
         cd ${IMAGE_VERSION}
         echo "Building image version ${IMAGE_VERSION}"
         docker build .
       env:
-        IMAGE_VERSION: $(cat VERSION)
+        IMAGE_VERSION: ${{ steps.version.outputs.version }}
