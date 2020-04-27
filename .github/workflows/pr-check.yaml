@@ -25,9 +25,9 @@ jobs:
         fetch-depth: 1
 
     - name: Get VERSION
-        id: version
-        run: |
-          echo "##[set-output name=version;]$(cat VERSION)"
+      id: version
+      run: |
+        echo "##[set-output name=version;]$(cat VERSION)"
 
     - name: Docker build
       run: |
