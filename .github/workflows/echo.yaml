@@ -29,7 +29,6 @@ jobs:
       - name: Docker build, tag, and push
         run: |
           echo "Building image ${IMAGE_NAME}"
-          cd ${IMAGE_VERSION}
           docker build -t ${IMAGE_NAME} .
           docker tag "${IMAGE_NAME}" "${IMAGE_NAME}:${IMAGE_VERSION}"
           echo "$Pushing {IMAGE_NAME}:${IMAGE_VERSION}"
