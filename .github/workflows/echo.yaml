@@ -16,27 +16,9 @@ jobs:
       - name: Setup params
         id: version-sha
         run: |
-          echo "##[set-output name=version;]$(cat VERSION)"
-          echo "##[set-output name=sha_id;]$(git rev-parse --short HEAD)"
-
-      - name: Docker login
-        uses: azure/docker-login@v1
-        with:
-          login-server: quay.io
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-        
-      - name: Docker build, tag, and push
-        run: |
-          echo "Building image ${IMAGE_NAME}"
-          docker build -t ${IMAGE_NAME} .
-          docker tag "${IMAGE_NAME}" "${IMAGE_NAME}:${IMAGE_VERSION}"
-          echo "$Pushing {IMAGE_NAME}:${IMAGE_VERSION}"
-          docker push "${IMAGE_NAME}:${IMAGE_VERSION}"
-          docker tag "${IMAGE_NAME}" "${IMAGE_NAME}:${IMAGE_VERSION}-${SHORT_SHA1}"
-          echo "Pushing ${IMAGE_NAME}:${IMAGE_VERSION}-${SHORT_SHA1}"
-          docker push "${IMAGE_NAME}:${IMAGE_VERSION}-${SHORT_SHA1}"
-        env:
-          IMAGE_NAME: quay.io/ericwill/k8s-sidecar
-          IMAGE_VERSION: ${{ steps.version-sha.outputs.version }}
-          SHORT_SHA1: ${{ steps.version-sha.outputs.sha_id }}
+          IMAGE_VERSION=$(cat VERSION)
+          SHORT_SHA1=$(git rev-parse --short HEAD)
+          declare -a tags=(${IMAGE_VERSION} ${IMAGE_VERSION}:${SHORT_SHA1})
+          for val in ${tags[@]}; do
+            echo "Tagging and pushing $val"
+          done
