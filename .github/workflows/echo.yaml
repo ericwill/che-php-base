@@ -7,6 +7,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      - name: Docker Buildx
+        uses: crazy-max/ghaction-docker-buildx@v1.4.0
+        with:
+          version: v0.4.1
       
       - name: Clone source code
         uses: actions/checkout@v1
@@ -18,7 +22,5 @@ jobs:
         run: |
           IMAGE_VERSION=$(cat VERSION)
           SHORT_SHA1=$(git rev-parse --short HEAD)
-          declare -a tags=(${IMAGE_VERSION} ${IMAGE_VERSION}:${SHORT_SHA1})
-          for val in ${tags[@]}; do
-            echo "Tagging and pushing $val"
-          done
+          PLATFORMS=$(cat PLATFORMS)
+          docker buildx build --platform "${PLATFORMS}" .
