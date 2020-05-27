@@ -7,6 +7,7 @@
 #
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
+#dummy change
 
 FROM php:7.4-apache
 
