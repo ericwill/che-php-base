@@ -7,7 +7,6 @@
 #
 # Contributors:
 #   Red Hat, Inc. - initial API and implementation
-# let's try this again
 FROM php:7.4-apache
 
 RUN apt-get -y update \
